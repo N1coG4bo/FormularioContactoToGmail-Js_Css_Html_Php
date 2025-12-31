@@ -3,6 +3,7 @@
 // Autor: Nicolás & Kirli AI
 header('Content-Type: text/html; charset=utf-8');
 
+// 1. CARGA DE CREDENCIALES SEGURA
 // Carga de credenciales segura
 if (file_exists('config.php')) {
     require_once 'config.php';
@@ -10,22 +11,23 @@ if (file_exists('config.php')) {
     die("Error crítico: Falta config.php. Sube este archivo a tu carpeta en Infinity Free.");
 }
 
+// 2. VERIFICACIÓN DEL MÉTODO DE ENVÍO
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // 1. RECOLECCIÓN
+    // 3. RECOLECCIÓN Y LIMPIEZA DE DATOS
     $nombre = htmlspecialchars(trim($_POST['nombre']));
     $email_usuario = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
     $asunto_usuario = isset($_POST['asunto']) ? htmlspecialchars(trim($_POST['asunto'])) : "Consulta Web";
     $mensaje = htmlspecialchars(trim($_POST['mensaje']));
 
-    // 2. USO DE VARIABLES (Desde config.php)
+    // Uso de variables desde config.php
     $mi_usuario = SMTP_USUARIO; 
     $mi_password = SMTP_PASSWORD; 
     $correo_destino = SMTP_DESTINO; 
     $servidor = SMTP_SERVIDOR;
     $puerto = SMTP_PUERTO; 
 
-    // 3. ARMADO DEL CORREO
+    // 4. CONSTRUCCIÓN DEL CORREO
     $asunto_final = $asunto_usuario . " (" . $nombre . ")";
     
     // Cabeceras vitales para evitar Spam
@@ -39,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cabeceras .= "MIME-Version: 1.0\r\n";
     $cabeceras .= "Content-Type: text/plain; charset=UTF-8\r\n\r\n";
 
+    // Cuerpo del mensaje
     $cuerpo  = "Nuevo mensaje desde Infinity Free:\r\n";
     $cuerpo .= "-----------------------------------\r\n";
     $cuerpo .= "De: $nombre ($email_usuario)\r\n";
@@ -47,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cuerpo .= $mensaje . "\r\n";
     $cuerpo .= "-----------------------------------\r\n.";
 
-    // 4. MOTOR DE ENVÍO (Modificado para Hosting Gratuito)
+    // 5. ENVÍO DEL CORREO (MOTOR DE ENVÍO)
     try {
         // TRUCO PARA INFINITY FREE:
         // Creamos un contexto que permite certificados SSL "relajados".
@@ -106,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         chat_silencioso($socket, "QUIT");
         fclose($socket);
 
-        // 5. RESPUESTA AL USUARIO
+        // 6. RESPUESTA AL USUARIO
         // El código 250 significa "OK" en idioma SMTP
         if (strpos($resultado_final, "250") !== false) {
             echo "<script>
